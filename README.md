@@ -15,7 +15,7 @@
 
 ## Démo en ligne
 
-> [Voir la démonstration en direct](https://lendershareapi.pages.dev)
+> [Voir la démonstration en direct](https://lendershareapi.pages.dev/test.html)
 
 ---
 
@@ -29,7 +29,7 @@ Télécharge le fichier `LenderShareAPI.js` et place-le dans ton projet.
 
 ```html
 <script type="module">
-  import { LenderShareAPI } from './js/LenderShareAPI.js';
+  import { LenderShareAPI } from 'https://lendershareapi.pages.dev/LenderShareAPI.js';
 
   document.getElementById("shareBtn").addEventListener("click", () => {
     LenderShareAPI.share({
