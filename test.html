@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Démo Partage</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100">
+
+  <button id="shareBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Partager</button>
+
+  <script type="module">
+  import { LenderShareAPI } from 'https://lendershareapi.pages.dev/LenderShareAPI.js';
+
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    LenderShareAPI.share({
+      title: "Mon site",
+      text: "Découvre cette superbe page !",
+      url: "https://exemple.com"
+    });
+  });
+</script>
+
+</body>
+</html>

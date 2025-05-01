@@ -1,0 +1,167 @@
+export const LenderShareAPI = {
+  share({ title = '', text = '', url = window.location.href }) {
+    if (navigator.share) {
+      return navigator.share({ title, text, url });
+    }
+
+    if (!document.getElementById('shareContainer')) {
+      injectFontAwesome();
+      injectShareStyles();
+      injectShareHTML();
+    }
+
+    document.querySelectorAll('.social-icon').forEach(button => {
+      button.onclick = () => {
+        const platform = button.getAttribute('data-share');
+        handleShare(platform, { title, text, url });
+      };
+    });
+
+    document.getElementById('shareBackdrop').classList.add('show');
+    document.getElementById('shareContainer').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+};
+
+// Inject Font Awesome (sans import HTML)
+function injectFontAwesome() {
+  if (!document.getElementById('fa-injected')) {
+    const link = document.createElement('link');
+    link.id = 'fa-injected';
+    link.rel = 'stylesheet';
+    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+    document.head.appendChild(link);
+  }
+}
+
+// Inject styles sans Tailwind
+function injectShareStyles() {
+  const style = document.createElement('style');
+  style.textContent = `
+    .share-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+      z-index: 40;
+    }
+    .share-backdrop.show {
+      opacity: 1; pointer-events: all;
+    }
+    .share-container {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      transform: translateY(100%); transition: transform 0.3s ease;
+      z-index: 50; max-width: 500px; margin: auto;
+      background: white; border-radius: 16px 16px 0 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      font-family: sans-serif;
+    }
+    .share-container.show {
+      transform: translateY(0);
+    }
+    .share-header, .share-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem; border-bottom: 1px solid #ddd;
+    }
+    .share-footer {
+      border-top: 1px solid #ddd;
+    }
+    .share-title {
+      font-size: 1rem; font-weight: bold; color: #333;
+    }
+    .share-btn {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+      padding: 1rem; text-align: center; font-size: 0.75rem; color: #444;
+    }
+    .social-icon {
+      display: flex; flex-direction: column; align-items: center;
+      transition: transform 0.2s ease;
+    }
+    .social-icon:hover {
+      transform: scale(1.1);
+    }
+    .icon-wrapper {
+      width: 48px; height: 48px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.5rem; background: #f3f4f6;
+    }
+    .close-btn, .cancel-btn {
+      background: none; border: none; color: #2563eb;
+      font-weight: bold; cursor: pointer;
+    }
+    .cancel-btn {
+      width: 100%; padding: 0.75rem 1rem; font-size: 1rem;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function injectShareHTML() {
+  const html = `
+    <div id="shareBackdrop" class="share-backdrop"></div>
+    <div id="shareContainer" class="share-container">
+      <div class="share-header">
+        <span class="share-title">Partager via...</span>
+        <button id="closeShare" class="close-btn"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="share-btn">
+        ${getButtonsHTML()}
+      </div>
+      <div class="share-footer">
+        <button id="cancelShare" class="cancel-btn">Annuler</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+
+  document.getElementById('cancelShare').onclick = hideShare;
+  document.getElementById('closeShare').onclick = hideShare;
+  document.getElementById('shareBackdrop').onclick = hideShare;
+  document.getElementById('shareContainer').onclick = e => e.stopPropagation();
+}
+
+function hideShare() {
+  document.getElementById('shareBackdrop')?.classList.remove('show');
+  document.getElementById('shareContainer')?.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function handleShare(platform, { title, text, url }) {
+  const t = encodeURIComponent(text);
+  const u = encodeURIComponent(url);
+  const s = encodeURIComponent(title);
+  let shareUrl = '';
+
+  switch (platform) {
+    case 'whatsapp': shareUrl = `https://wa.me/?text=${t}%20${u}`; break;
+    case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${u}`; break;
+    case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${t}&url=${u}`; break;
+    case 'email': shareUrl = `mailto:?subject=${s}&body=${t}%20${u}`; break;
+    case 'telegram': shareUrl = `https://t.me/share/url?url=${u}&text=${t}`; break;
+    case 'messenger': shareUrl = `fb-messenger://share/?link=${u}`; break;
+    case 'sms': shareUrl = `sms:?body=${t}%20${u}`; break;
+    case 'clipboard':
+      navigator.clipboard.writeText(`${text} ${url}`).then(() => alert("Lien copié !"));
+      hideShare(); return;
+  }
+
+  if (shareUrl) window.open(shareUrl, '_blank');
+  hideShare();
+}
+
+function getButtonsHTML() {
+  return [
+    ['whatsapp', 'fab fa-whatsapp', 'color:#25D366'],
+    ['facebook', 'fab fa-facebook', 'color:#1877F2'],
+    ['twitter', 'fab fa-twitter', 'color:#1DA1F2'],
+    ['email', 'fas fa-envelope', 'color:#666'],
+    ['telegram', 'fab fa-telegram', 'color:#0088cc'],
+    ['messenger', 'fab fa-facebook-messenger', 'color:#0078FF'],
+    ['sms', 'fas fa-comment-dots', 'color:#0f0'],
+    ['clipboard', 'fas fa-copy', 'color:#7c3aed']
+  ].map(([id, icon, color]) => `
+    <button class="social-icon" data-share="${id}">
+      <div class="icon-wrapper" style="${color}">
+        <i class="${icon}" style="${color}; font-size:1.5rem;"></i>
+      </div>
+      <span>${id.charAt(0).toUpperCase() + id.slice(1)}</span>
+    </button>
+  `).join('');
+}
