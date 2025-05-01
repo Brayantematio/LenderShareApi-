@@ -1,13 +1,23 @@
+
+function injectTailwindCSS() {
+  if (!document.getElementById('tailwind-injected')) {
+    const script = document.createElement('script');
+    script.id = 'tailwind-injected';
+    script.src = 'https://cdn.tailwindcss.com';
+    document.head.appendChild(script);
+  }
+}
+
+
 export const LenderShareAPI = {
   share({ title = '', text = '', url = window.location.href }) {
-    if (navigator.share) {
-      return navigator.share({ title, text, url });
-    }
+    
 
     if (!document.getElementById('shareContainer')) {
       injectFontAwesome();
       injectShareStyles();
       injectShareHTML();
+      injectTailwindCSS()
     }
 
     document.querySelectorAll('.social-icon').forEach(button => {
@@ -130,13 +140,44 @@ function handleShare(platform, { title, text, url }) {
   let shareUrl = '';
 
   switch (platform) {
-    case 'whatsapp': shareUrl = `https://wa.me/?text=${t}%20${u}`; break;
-    case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${u}`; break;
-    case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${t}&url=${u}`; break;
-    case 'email': shareUrl = `mailto:?subject=${s}&body=${t}%20${u}`; break;
-    case 'telegram': shareUrl = `https://t.me/share/url?url=${u}&text=${t}`; break;
-    case 'messenger': shareUrl = `fb-messenger://share/?link=${u}`; break;
-    case 'sms': shareUrl = `sms:?body=${t}%20${u}`; break;
+    case 'linkedin':
+  shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${u}&title=${s}&summary=${t}`;
+  break;
+case 'reddit':
+  shareUrl = `https://www.reddit.com/submit?url=${u}&title=${s}`;
+  break;
+case 'pinterest':
+  shareUrl = `https://pinterest.com/pin/create/button/?url=${u}&description=${t}`;
+  break;
+case 'tumblr':
+  shareUrl = `https://www.tumblr.com/widgets/share/tool?canonicalUrl=${u}&title=${s}&caption=${t}`;
+  break;
+case 'snapchat':
+  shareUrl = `https://www.snapchat.com/scan?attachmentUrl=${u}`;
+  break;
+case 'line':
+  shareUrl = `https://social-plugins.line.me/lineit/share?url=${u}`;
+  break;
+case 'skype':
+  shareUrl = `https://web.skype.com/share?url=${u}&text=${t}`;
+  break;
+case 'discord':
+  shareUrl = `https://discord.com/channels/@me`; // lien à ouvrir manuellement
+  alert("Copié pour partager dans Discord.");
+  navigator.clipboard.writeText(`${text} ${url}`);
+  break;
+case 'weibo':
+  shareUrl = `https://service.weibo.com/share/share.php?url=${u}&title=${t}`;
+  break;
+case 'vk':
+  shareUrl = `https://vk.com/share.php?url=${u}`;
+  break;
+case 'xing':
+  shareUrl = `https://www.xing.com/app/user?op=share&url=${u}`;
+  break;
+case 'buffer':
+  shareUrl = `https://buffer.com/add?text=${t}&url=${u}`;
+  break;
     case 'clipboard':
       navigator.clipboard.writeText(`${text} ${url}`).then(() => alert("Lien copié !"));
       hideShare(); return;
@@ -155,7 +196,19 @@ function getButtonsHTML() {
     ['telegram', 'fab fa-telegram', 'color:#0088cc'],
     ['messenger', 'fab fa-facebook-messenger', 'color:#0078FF'],
     ['sms', 'fas fa-comment-dots', 'color:#0f0'],
-    ['clipboard', 'fas fa-copy', 'color:#7c3aed']
+    ['clipboard', 'fas fa-copy', 'color:#7c3aed'],
+    ['linkedin', 'fab fa-linkedin', 'color:#0077b5'],
+    ['reddit', 'fab fa-reddit', 'color:#FF5700'],
+    ['pinterest', 'fab fa-pinterest', 'color:#E60023'],
+    ['tumblr', 'fab fa-tumblr', 'color:#36465D'],
+    ['snapchat', 'fab fa-snapchat-ghost', 'color:#FFFC00'],
+    ['line', 'fab fa-line', 'color:#00c300'],
+    ['skype', 'fab fa-skype', 'color:#00aff0'],
+    ['discord', 'fab fa-discord', 'color:#5865F2'],
+    ['weibo', 'fab fa-weibo', 'color:#E6162D'],
+    ['vk', 'fab fa-vk', 'color:#4680C2'],
+    ['xing', 'fab fa-xing', 'color:#026466'],
+    ['buffer', 'fab fa-buffer', 'color:#168eea']
   ].map(([id, icon, color]) => `
     <button class="social-icon" data-share="${id}">
       <div class="icon-wrapper" style="${color}">
